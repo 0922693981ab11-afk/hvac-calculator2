@@ -29,7 +29,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        const { useState, useMemo, useEffect } = React;
 
         // --- 內嵌圖示組件 (替代 Lucide-react) ---
         const IconBase = ({ d, className }) => (
@@ -50,8 +50,9 @@
         const Plus = (props) => <IconBase {...props} d={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />;
         const Trash2 = (props) => <IconBase {...props} d={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />;
         const MapPin = (props) => <IconBase {...props} d={<><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></>} />;
-        // 新增 Mail 圖示
         const Mail = (props) => <IconBase {...props} d={<><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></>} />;
+        // 新增: Eye icon for views
+        const Eye = (props) => <IconBase {...props} d={<><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>} />;
 
         // --- 主應用程式 ---
         const App = () => {
@@ -90,6 +91,20 @@
 
           // 模式切換
           const [activeTab, setActiveTab] = useState('design'); // 'design' | 'test' | 'prv'
+
+          // --- Effects ---
+          // 載入不蒜子計數器 (Busuanzi Counter)
+          // 注意：這個服務在本地開啟 (file://) 時可能不會顯示數字，上傳到 GitHub 後會正常運作
+          useEffect(() => {
+            const script = document.createElement('script');
+            script.src = "//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js";
+            script.async = true;
+            document.body.appendChild(script);
+            return () => {
+                // Cleanup usually not needed for global script but good practice
+                try { document.body.removeChild(script); } catch(e) {}
+            }
+          }, []);
 
           // --- Calculations: Basic ---
 
@@ -236,6 +251,7 @@
 
               results.push({
                 floor: currentFloorLabel,
+                // FIX: 直接顯示該層的高度設定
                 heightOfFloor: getFloorHeight(currentFloorLabel), 
                 cumulativeHeight: cumulativeHeight,
                 pressure: pressureKg,
@@ -655,6 +671,20 @@
 
                   </div>
                 )}
+
+                {/* Footer with Busuanzi Counter */}
+                <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-500 pb-8">
+                    <div className="flex justify-center items-center gap-2 mb-2">
+                       {/* Busuanzi container id */}
+                       <span id="busuanzi_container_site_uv" style={{display: 'none'}}>
+                          <span className="flex items-center gap-1 bg-slate-100 px-3 py-1 rounded-full">
+                             <Eye className="w-4 h-4 text-blue-500" /> 
+                             總訪客人數: <span id="busuanzi_value_site_uv" className="font-bold text-blue-600">--</span> 人次
+                          </span>
+                       </span>
+                    </div>
+                    <p>© {new Date().getFullYear()} {appTitle} | Design by {designer}</p>
+                </div>
 
               </div>
             </div>
